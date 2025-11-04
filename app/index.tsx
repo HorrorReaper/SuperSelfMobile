@@ -6,15 +6,19 @@ import { useTaskStore } from '../stores/taskStore';
 import { XPBar } from '../components/XPBar';
 import { TaskCard } from '../components/TaskCard';
 import { HabitCard } from '../components/HabitCard';
+import { useChallengeStore } from '../stores/challengeStore';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { profile, initializeUser, addXP } = useUserStore();
   const { habits, getTodayPlan, toggleTask, toggleHabit, initializeStore } = useTaskStore();
+  const { getCurrentChallenge, initializeChallenges, progress } = useChallengeStore();
+const currentChallenge = getCurrentChallenge();
 
   useEffect(() => {
     initializeUser();
     initializeStore();
+    initializeChallenges();
   }, []);
 
   const todayPlan = getTodayPlan();
@@ -33,6 +37,27 @@ export default function HomeScreen() {
             <Text style={styles.statLabel}>Day Streak</Text>
           </View>
         </View>
+        {currentChallenge && (
+  <TouchableOpacity
+    style={styles.challengeCard}
+    onPress={() => router.push('/challenge')}
+  >
+    <View style={styles.challengeHeader}>
+      <Text style={styles.challengeDay}>Day {progress.currentDay} Challenge</Text>
+      {!currentChallenge.completed && <Text style={styles.newBadge}>NEW</Text>}
+    </View>
+    <Text style={styles.challengeTitle}>{currentChallenge.title}</Text>
+    <Text style={styles.challengeMission} numberOfLines={2}>
+      {currentChallenge.mission}
+    </Text>
+    <View style={styles.challengeFooter}>
+      <Text style={styles.challengeReward}>+{currentChallenge.xpReward} XP</Text>
+      <Text style={styles.challengeCTA}>
+        {currentChallenge.completed ? '✓ Completed' : 'View Mission →'}
+      </Text>
+    </View>
+  </TouchableOpacity>
+)}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -163,4 +188,60 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  challengeCard: {
+  backgroundColor: '#1e1e1e',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 24,
+  borderLeftWidth: 4,
+  borderLeftColor: '#4CAF50',
+},
+challengeHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+challengeDay: {
+  fontSize: 12,
+  color: '#4CAF50',
+  fontWeight: '600',
+  textTransform: 'uppercase',
+},
+newBadge:{
+backgroundColor: '#4CAF50',
+color: '#000',
+fontSize: 10,
+fontWeight: '700',
+paddingHorizontal: 8,
+paddingVertical: 2,
+borderRadius: 4,
+},
+challengeTitle: {
+fontSize: 18,
+fontWeight: '700',
+color: '#fff',
+marginBottom: 8,
+},
+challengeMission: {
+fontSize: 14,
+color: '#aaa',
+lineHeight: 20,
+marginBottom: 12,
+},
+challengeFooter: {
+flexDirection: 'row',
+justifyContent: 'space-between',
+alignItems: 'center',
+},
+challengeReward: {
+fontSize: 14,
+color: '#4CAF50',
+fontWeight: '600',
+},
+challengeCTA: {
+fontSize: 14,
+color: '#888',
+fontWeight: '500',
+},
 });

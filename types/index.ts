@@ -53,3 +53,22 @@ export interface RedemptionConfig {
   cooldownHours: number;
   dailyXPCap: number;
 } //Typ für die Konfiguration der XP-Einlösung
+
+export interface DailyChallenge {
+  day: number;
+  title: string;
+  category: 'mindset' | 'health' | 'productivity' | 'social' | 'habits';
+  description: string;
+  mission: string;
+  tips: string[];
+  xpReward: number;
+  completed: boolean;
+  unlockedAt?: string;
+  completedAt?: string;
+} //Typ für eine tägliche Herausforderung in der Journey des Nutzers
+
+export interface ChallengeProgress {
+  currentDay: number;
+  challenges: DailyChallenge[]; //Liste der täglichen Herausforderungen
+  startDate: string;
+} //Typ für den Fortschritt der täglichen Herausforderungen
