@@ -31,7 +31,7 @@ export interface XPTransaction {
 export interface DailyPlan {
     date : string;
     tasks: Task[];
-    habits: Habit[];
+    habits: string[];
     xpEarned: number;
     xpSpendt: number;
     reflectionCompleted: boolean;
