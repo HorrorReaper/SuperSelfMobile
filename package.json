@@ -9,7 +9,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native/babel-preset": "^0.82.1",
     "autoprefixer": "^10.4.21",
+    "babel-preset-expo": "^54.0.6",
+    "date-fns": "^4.1.0",
     "expo": "~54.0.22",
     "expo-constants": "~18.0.10",
     "expo-linking": "~8.0.8",
