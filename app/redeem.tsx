@@ -1,45 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../stores/userStore';
 import { canRedeem } from '../lib/xpEconomy';
 import { REDEMPTION_CONFIG } from '../constants/config';
 import { RedemptionTimer } from '../components/RedemptionTimer';
-
+import { AppState } from 'react-native';
+import { useAppBlockingStore } from '../stores/appBlockingStores';
 
 export default function RedeemScreen() {
   const router = useRouter();
   const { profile, redeemXP, getTodayRedeemed } = useUserStore();
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redemptionMinutes, setRedemptionMinutes] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+
+  const deductXP = (amount: number, minutes: number) => {
+    redeemXP(amount, minutes);
+  };
+  const {
+  currentSession,
+  isBlocking,
+  startBlockingSession,
+  endBlockingSession,
+  getActiveBlockedApps,
+  initializeBlocking,
+} = useAppBlockingStore();
+
+useEffect(() => {
+  initializeBlocking();
+}, []);
 
   const todayRedeemed = getTodayRedeemed();
 
-  const handleRedeem = (minutes: number) => {
-    const xpCost = (minutes / 10) * REDEMPTION_CONFIG.XP_PER_10_MIN;
-    const check = canRedeem(profile.currentXP, minutes, profile.lastRedemptionTime, todayRedeemed);
+const handleRedeem = async (minutes: number, xpCost: number) => {
+  if (profile.currentXP < xpCost) {
+    Alert.alert('Insufficient XP', 'You don\'t have enough XP to redeem this');
+    return;
+  }
 
-    if (!check.allowed) {
-      Alert.alert('Cannot Redeem', check.reason);
-      return;
-    }
-
-    Alert.alert(
-      'Are you sure?',
-      `Spend ${xpCost} XP for ${minutes} minutes of doomscrolling?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: () => {
-            redeemXP(xpCost, minutes);
-            setRedemptionMinutes(minutes);
-            setIsRedeeming(true);
-          },
+  const blockedApps = getActiveBlockedApps();
+  
+  Alert.alert(
+    'Start Redemption?',
+    `This will:\n• Deduct ${xpCost} XP\n• Give you ${minutes} minutes\n• Block ${blockedApps.length} apps`,
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Start',
+        onPress: async () => {
+          deductXP(xpCost, minutes);
+          await startBlockingSession(minutes, xpCost);
+          setTimeRemaining(minutes * 60);
+          setIsActive(true);
         },
-      ]
-    );
-  }; // Diese Funktion behandelt die Einlöse-Logik und zeigt eine Bestätigungsaufforderung an.
+      },
+    ]
+  );
+}; // Diese Funktion behandelt die Einlöse-Logik und zeigt eine Bestätigungsaufforderung an.
 
   if (isRedeeming) {
     return (
@@ -65,6 +84,13 @@ export default function RedeemScreen() {
     );
   }
 
+  const handleEnd = async () => {
+  setIsActive(false);
+  setTimeRemaining(0);
+  await endBlockingSession();
+  router.back();
+};
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -76,11 +102,24 @@ export default function RedeemScreen() {
       <Text style={styles.subtitle}>
         Redeemed today: {todayRedeemed}/{REDEMPTION_CONFIG.MAX_MINUTES_PER_DAY} min
       </Text>
+      {isBlocking && currentSession && (
+  <View style={styles.blockingBanner}>
+    <Text style={styles.blockingTitle}>🚫 Apps Currently Blocked</Text>
+    <Text style={styles.blockingText}>
+      {getActiveBlockedApps().map(app => app.appName).join(', ')}
+    </Text>
+    {currentSession.violations > 0 && (
+      <Text style={styles.violationText}>
+        ⚠️ {currentSession.violations} violation{currentSession.violations > 1 ? 's' : ''} detected
+      </Text>
+    )}
+  </View>
+)}
 
       <View style={styles.options}>
         <TouchableOpacity
           style={styles.optionCard}
-          onPress={() => handleRedeem(10)}
+          onPress={() => handleRedeem(10, 30)}
         >
           <Text style={styles.optionTime}>10 min</Text>
           <Text style={styles.optionCost}>30 XP</Text>
@@ -88,11 +127,17 @@ export default function RedeemScreen() {
 
         <TouchableOpacity
           style={styles.optionCard}
-          onPress={() => handleRedeem(20)}
+          onPress={() => handleRedeem(20, 60)}
         >
           <Text style={styles.optionTime}>20 min</Text>
           <Text style={styles.optionCost}>60 XP</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+  style={styles.settingsLink}
+  onPress={() => router.push('/blocking-settings')}
+>
+  <Text style={styles.settingsLinkText}>⚙️ Configure Blocked Apps</Text>
+</TouchableOpacity>
       </View>
     </View>
   );
@@ -155,4 +200,39 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 16,
   },
+  blockingBanner: {
+  backgroundColor: '#2a1a1a',
+  padding: 16,
+  borderRadius: 12,
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: '#FF5252',
+},
+blockingTitle: {
+  color: '#FF5252',
+  fontSize: 14,
+  fontWeight: '600',
+  marginBottom: 8,
+},
+blockingText: {
+  color: '#aaa',
+  fontSize: 13,
+  lineHeight: 20,
+},
+violationText: {
+  color: '#FF9800',
+  fontSize: 13,
+  marginTop: 8,
+  fontWeight: '500',
+},
+settingsLink: {
+  padding: 16,
+  alignItems: 'center',
+  marginBottom: 20,
+},
+settingsLinkText: {
+  color: '#4CAF50',
+  fontSize: 15,
+  fontWeight: '500',
+},
 });

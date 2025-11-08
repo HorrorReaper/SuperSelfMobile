@@ -13,6 +13,9 @@ export default function RootLayout() {
       <Stack.Screen name="plan" />
       <Stack.Screen name="reflect" />
       <Stack.Screen name="redeem" />
+      <Stack.Screen name="challenge" />
+      <Stack.Screen name="blocking-settings" />
+
       <Stack.Screen name="stats" options={{ presentation: 'modal' }} />
     </Stack>
   );

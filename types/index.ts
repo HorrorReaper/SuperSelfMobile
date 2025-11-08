@@ -72,3 +72,21 @@ export interface ChallengeProgress {
   challenges: DailyChallenge[]; //Liste der täglichen Herausforderungen
   startDate: string;
 } //Typ für den Fortschritt der täglichen Herausforderungen
+
+export interface BlockedApp {
+  packageName: string;
+  appName: string;
+  icon?: string;
+  isBlocked: boolean;
+} //Typ für eine blockierte App während einer Blocking Session
+
+export interface BlockingSession {
+  id: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  xpCost: number;
+  blockedApps: string[];
+  violations: number;
+  completed: boolean;
+} //Typ für eine Blocking Session, in der bestimmte Apps blockiert werden
