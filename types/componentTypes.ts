@@ -1,4 +1,4 @@
-import { Habit, Task } from './index';
+import { Habit, MicroChallenge, Task } from './index';
 
 
 export interface XPBarProps {
@@ -17,4 +17,13 @@ export interface RedemptionTimerProps {
 export interface HabitCardProps {
   habit: Habit;
   onToggle: () => void;
+}
+
+export interface ChallengeModalProps {
+  visible: boolean;
+  challenge: MicroChallenge;
+  appName: string;
+  onSuccess: () => void;
+  onFail: () => void;
+  onSkip: () => void;
 }

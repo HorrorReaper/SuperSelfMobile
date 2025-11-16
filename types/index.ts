@@ -90,3 +90,49 @@ export interface BlockingSession {
   violations: number;
   completed: boolean;
 } //Typ für eine Blocking Session, in der bestimmte Apps blockiert werden
+
+//Hier kommen Typen für das App-Locking System
+export type UnblockChallengeType = 'math' | 'breathing' | 'affirmation' | 'why' | 'pushups'; 
+//Typen für die verschiedenen Arten vonunblocking Herausforderungen
+
+export interface MicroChallenge {
+  id: string;
+  type: UnblockChallengeType;
+  question?: string;
+  answer?: string | number;
+  options?: string[];
+  duration?: number; // seconds
+  instruction: string;
+} //Typ für eine Mikro-Herausforderung bevor man eine App öffnen kann
+
+export interface ChallengeAttempt {
+  challengeId: string;
+  appPackage: string;
+  appName: string;
+  timestamp: string;
+  success: boolean;
+  timeToComplete: number; // seconds
+} //Typ für einen Versuch, eine Herausforderung zu meistern
+
+export interface AppUnlock {
+  packageName: string;
+  unlockedAt: string;
+  expiresAt: string;
+  challengeCompleted: string;
+} //Typ für eine Freischaltung einer App nach erfolgreichem Abschluss einer Herausforderung
+
+// Update BlockingSession
+export interface BlockingSession {
+  id: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  xpCost: number;
+  blockedApps: string[];
+  violations: number;
+  successfulChallenges: number;
+  failedChallenges: number;
+  completed: boolean;
+  unlocks: AppUnlock[];
+} //Typ für eine Blocking Session, in der bestimmte Apps blockiert werden
+

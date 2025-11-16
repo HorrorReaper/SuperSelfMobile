@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppBlockingStore } from '../stores/appBlockingStores';
+import { appMonitor } from '../services/appMonitor';
 
 export default function BlockingSettingsScreen() {
   const router = useRouter();
@@ -17,6 +19,13 @@ export default function BlockingSettingsScreen() {
   useEffect(() => {
     initializeBlocking();
   }, []); // Initialisiere die Blockierungseinstellungen beim Laden des Bildschirms
+
+  // Render-time debug log to quickly inspect store state when the screen renders
+  console.log('[BlockingSettings] render blockedApps ->', blockedApps.map(a => ({ packageName: a.packageName, isBlocked: a.isBlocked })));
+
+  const getActiveBlockedApps = () => {
+    return blockedApps.filter((app) => app.isBlocked);
+  }
 
   return (
     <View style={styles.container}>
@@ -43,6 +52,12 @@ export default function BlockingSettingsScreen() {
 
         <Text style={styles.sectionTitle}>Apps to Block</Text>
 
+        {/* Debug: show store contents so you can confirm which apps are currently flagged blocked */}
+        <View style={styles.debugBox}>
+          <Text style={styles.debugTitle}>Debug store (blockedApps)</Text>
+          <Text style={styles.debugText}>{JSON.stringify(blockedApps, null, 2)}</Text>
+        </View>
+
         {blockedApps.map((app) => (
           <View key={app.packageName} style={styles.appCard}>
             <View style={styles.appInfo}>
@@ -67,6 +82,23 @@ export default function BlockingSettingsScreen() {
         </View>
 
         <View style={{ height: 40 }} />
+
+<View style={styles.testSection}>
+  <Text style={styles.sectionTitle}>Test Blocking System</Text>
+  
+  {getActiveBlockedApps().map((app) => (
+    <TouchableOpacity
+      key={app.packageName}
+      style={styles.testButton}
+      onPress={() => {
+        Alert.alert('Simulate Block', `Simulating blocked open: ${app.appName}`);
+        appMonitor.simulateBlockedAppOpen(app.packageName);
+      }}
+    >
+      <Text style={styles.testButtonText}>Test Block: {app.appName}</Text>
+    </TouchableOpacity>
+  ))}
+</View>
       </ScrollView>
     </View>
   );
@@ -169,4 +201,38 @@ const styles = StyleSheet.create({
     color: '#aaa',
     lineHeight: 20,
   },
+  debugBox: {
+    backgroundColor: '#0f0f12',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  debugTitle: {
+    color: '#fff',
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  debugText: {
+    color: '#ccc',
+    fontSize: 12,
+    fontFamily: 'monospace',
+  },
+  testSection: {
+  marginTop: 24,
+  paddingTop: 24,
+  borderTopWidth: 1,
+  borderTopColor: '#2a2a2a',
+},
+testButton: {
+  backgroundColor: '#2196F3',
+  padding: 14,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginBottom: 10,
+},
+testButtonText: {
+  color: '#fff',
+  fontSize: 15,
+  fontWeight: '600',
+},
 });
