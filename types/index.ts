@@ -3,10 +3,17 @@ export interface Task {
     id: string;
     title: string;
     completed: boolean;
+    description?: string;
     xpValue: number;
     createdAt: string;
     completedAt?: string;
-} //Typ für eine Aufgabe, die der Nutzer erledigen kann
+    priority?: 'high' | 'medium' | 'low' ;
+    estimatedDuration?: number; // minutes
+    scheduledFor?: string;
+    timeBlockId?: string;
+    category?: string;
+    tags?: string[];
+} //Typ für eine Aufgabeace 
 
 export interface Habit {
     id: string;
@@ -136,3 +143,96 @@ export interface BlockingSession {
   unlocks: AppUnlock[];
 } //Typ für eine Blocking Session, in der bestimmte Apps blockiert werden
 
+
+//--------------------------------------------------------------Morning-------------------------------------------------------------------------------------
+export interface RoutineStep {
+  id: string;
+  title: string;
+  description: string;
+  duration: number; // minutes
+  icon: string; // emoji
+  order: number;
+  isOptional: boolean;
+  completedToday: boolean;
+  completedAt?: Date;
+} // Einzelschritt einer Morgenroutine -> wie Fabulous
+
+export interface RoutineTemplate {
+  id: string;
+  name: string;
+  description: string;
+  steps: RoutineStep[];
+  totalDuration: number;
+  isActive: boolean;
+  createdAt: Date;
+} // Vorlage für eine Morgenroutine
+
+export interface RoutineProgress {
+  date: string; // YYYY-MM-DD
+  completedSteps: string[]; // step IDs
+  startedAt?: Date;
+  completedAt?: Date;
+  totalTimeSpent: number; // minutes
+  streak: number;
+} // Fortschritt einer Morgenroutine an einem bestimmten Tag
+
+// ============= DAY PLANNING =============
+
+
+export interface TimeBlock {
+  id: string;
+  title: string;
+  startTime: Date;
+  endTime: Date;
+  taskIds: string[];
+  color: string;
+  type: 'focus' | 'break' | 'meeting' | 'routine' | 'flexible';
+  date: string; // YYYY-MM-DD
+} //Typ für einen Zeitblock im Tagesplan
+
+export interface DayPlan {
+  date: string; // YYYY-MM-DD
+  tasks: Task[];
+  timeBlocks: TimeBlock[];
+  notes?: string;
+  topPriorities: string[]; // task IDs (max 3)
+  reflectionEvening?: string;
+  createdAt: Date;
+  updatedAt: Date;
+} //Typ für einen Tagesplan, der die Aufgaben und Zeitblöcke eines Tages zusammenfasst
+
+// ============= MORNING JOURNAL =============
+export interface JournalQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'number' | 'scale' | 'multiselect' | 'boolean';
+  placeholder?: string;
+  options?: string[]; // for multiselect
+  scaleMin?: number;
+  scaleMax?: number;
+  order: number;
+  isActive: boolean;
+  category: 'gratitude' | 'goals' | 'reflection' | 'mood' | 'custom';
+} //Typ für eine Frage im Morgenjournal
+
+export interface JournalAnswer {
+  questionId: string;
+  answer: string | number | boolean | string[];
+  answeredAt: Date;
+} //Typ für eine Antwort auf eine Journalfrage
+
+export interface JournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  answers: JournalAnswer[];
+  createdAt: Date;
+  updatedAt: Date;
+} //Typ für einen Journal-Eintrag für einen bestimmten Tag
+
+export interface JournalTemplate {
+  id: string;
+  name: string;
+  questions: JournalQuestion[];
+  isActive: boolean;
+  createdAt: Date;
+} //Typ für eine Vorlage für das Morgenjournal

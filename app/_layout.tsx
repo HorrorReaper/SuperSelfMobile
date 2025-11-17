@@ -7,7 +7,6 @@ import Constants from 'expo-constants';
 import { NativeModules, Platform } from 'react-native';
 import { checkUsageStatsPermission } from '../lib/nativeAppMonitor';
 
-
 export default function RootLayout() {
   const router = useRouter();
   const { isBlocking, initializeBlocking } = useAppBlockingStore();
@@ -46,6 +45,7 @@ export default function RootLayout() {
       appMonitor.stopMonitoring();
     };
   }, []);
+
   return (
     <Stack
       screenOptions={{
@@ -59,7 +59,7 @@ export default function RootLayout() {
       <Stack.Screen name="redeem" />
       <Stack.Screen name="challenge" />
       <Stack.Screen name="blocking-settings" />
-       <Stack.Screen
+      <Stack.Screen
         name="blocking-overlay"
         options={{
           presentation: 'fullScreenModal',
@@ -67,7 +67,48 @@ export default function RootLayout() {
         }}
       />
 
-      <Stack.Screen name="stats" options={{ presentation: 'modal' }} />
+      {/* Morning Routine Screens */}
+      <Stack.Screen 
+        name="morning-hub" 
+        options={{
+          headerShown: true,
+          title: 'Morning Ritual',
+          headerStyle: { backgroundColor: '#000' },
+          headerTintColor: '#fff',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen 
+        name="routine" 
+        options={{
+          headerShown: true,
+          title: 'Morning Routine',
+          headerStyle: { backgroundColor: '#000' },
+          headerTintColor: '#fff',
+          headerShadowVisible: false,
+          presentation: 'card',
+        }}
+      />
+      <Stack.Screen 
+        name="planning" 
+        options={{
+          headerShown: true,
+          title: 'Plan Tomorrow',
+          headerStyle: { backgroundColor: '#000' },
+          headerTintColor: '#fff',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen 
+        name="journal" 
+        options={{
+          headerShown: true,
+          title: 'Morning Journal',
+          headerStyle: { backgroundColor: '#000' },
+          headerTintColor: '#fff',
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

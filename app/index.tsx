@@ -92,6 +92,12 @@ const currentChallenge = getCurrentChallenge();
         >
           <Text style={styles.redeemButtonText}>💎 Redeem XP</Text>
         </TouchableOpacity>
+        <TouchableOpacity 
+  onPress={() => router.push('/morning-hub')}
+  style={styles.morningButton}
+>
+  <Text style={styles.morningButtonText}>🌅 Morning Ritual</Text>
+</TouchableOpacity>
 
         <TouchableOpacity
           style={styles.reflectButton}
@@ -245,4 +251,16 @@ fontSize: 14,
 color: '#888',
 fontWeight: '500',
 },
+morningButton: {
+    backgroundColor: '#667eea',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  morningButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
 });
