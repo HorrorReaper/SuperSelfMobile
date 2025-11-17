@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,37 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppBlockingStore } from '../stores/appBlockingStores';
-import { appMonitor } from '../services/appMonitor';
+import { appMonitor } from '../services/appMonitor2';
+import { checkUsageStatsPermission } from '../lib/nativeAppMonitor';
+import PermissionRequest from '../components/PermissionRequest';
 
 export default function BlockingSettingsScreen() {
   const router = useRouter();
   const { blockedApps, initializeBlocking, toggleAppBlock } = useAppBlockingStore();
+  const [hasPermission, setHasPermission] = useState(false);
+  const [permissionChecked, setPermissionChecked] = useState(false);
+
+  useEffect(() => {
+    checkPermission();
+  }, []);
+
+  const checkPermission = async () => {
+    const granted = await checkUsageStatsPermission();
+    setHasPermission(granted);
+    setPermissionChecked(true);
+
+    if (granted) {
+      await appMonitor.initialize();
+    }
+  };
+
+  if (!permissionChecked) {
+    return <View style={{ flex: 1, backgroundColor: '#000' }} />;
+  }
+
+  if (!hasPermission) {
+    return <PermissionRequest onPermissionGranted={() => setHasPermission(true)} />;
+  }
 
   useEffect(() => {
     initializeBlocking();

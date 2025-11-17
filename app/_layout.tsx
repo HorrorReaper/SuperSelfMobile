@@ -3,10 +3,25 @@ import { useAppBlockingStore } from '../stores/appBlockingStores';
 import { useEffect } from 'react';
 import { appMonitor } from '../services/appMonitor';
 import { MicroChallenge } from '../types';
+import Constants from 'expo-constants';
+import { NativeModules, Platform } from 'react-native';
+import { checkUsageStatsPermission } from '../lib/nativeAppMonitor';
+
 
 export default function RootLayout() {
   const router = useRouter();
   const { isBlocking, initializeBlocking } = useAppBlockingStore();
+  console.log('appOwnership:', Constants.appOwnership);
+  console.log('NativeModules.AppMonitor:', Platform.OS === 'android' ? NativeModules.AppMonitor : 'n/a');
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS === 'android') {
+        const perm = await checkUsageStatsPermission();
+        console.log('[Layout] hasUsageStatsPermission:', perm);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     initializeBlocking();
