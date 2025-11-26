@@ -38,6 +38,7 @@ interface DayPlanState {
   toggleTask: (date: string, taskId: string) => void;
   removeTask: (date: string, taskId: string) => void;
   updateTask: (date: string, taskId: string, updates: Partial<Task>) => void;
+  getCompletionRate: (date: string) => number;
 }
 
 const getTomorrowDate = () => {
@@ -214,6 +215,13 @@ export const useDayPlanStore = create<DayPlanState>()(
           
           return state;
         });
+      },
+      getCompletionRate: (date: string) => {
+        const plan = get().plans.find(p => p.date === date);
+        if (!plan || plan.tasks.length === 0) return 0;
+        
+        const completed = plan.tasks.filter(t => t.completed).length;
+        return Math.round((completed / plan.tasks.length) * 100);
       },
     }),
     {

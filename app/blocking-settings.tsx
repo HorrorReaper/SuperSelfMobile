@@ -4,10 +4,10 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Switch,
   Alert,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useRouter } from 'expo-router';
 import { useAppBlockingStore } from '../stores/appBlockingStores';
 import { appMonitor } from '../services/appMonitor2';
@@ -65,7 +65,7 @@ export default function BlockingSettingsScreen() {
         </Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <SafeScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>🚫 How it works</Text>
           <Text style={styles.infoText}>
@@ -125,7 +125,7 @@ export default function BlockingSettingsScreen() {
     </TouchableOpacity>
   ))}
 </View>
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }

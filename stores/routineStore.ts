@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RoutineTemplate } from '../types/index';
 import { RoutineState } from '../types/componentTypes';
 import { defaultTemplate } from '../constants/defaults';
+import { router } from 'expo-router';
 
 
 export const useRoutineStore = create<RoutineState>()(
@@ -123,7 +124,15 @@ export const useRoutineStore = create<RoutineState>()(
             history: [...state.history, { ...progress, completedAt: new Date() }],
             currentStepIndex: 0,
           }));
+          try {
+            // Navigate back to the morning hub after finishing the routine
+            router.replace('/morning-hub');
+          } catch (e) {
+            // router may not be available in some environments (eg. SSR/test); ignore safely
+            console.warn('[routineStore] navigation to /morning-hub failed', e);
+          }
         }
+        
       }, // Funktion zum Abschließen der Morgenroutine für den aktuellen Tag
 
       resetRoutine: () => {

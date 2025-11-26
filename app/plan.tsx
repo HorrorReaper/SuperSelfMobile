@@ -5,11 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useRouter } from 'expo-router';
 import { useTaskStore } from '../stores/taskStore';
 import { TaskCard } from '../components/TaskCard';
@@ -49,7 +49,7 @@ export default function PlanScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView
+      <SafeScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -150,7 +150,7 @@ export default function PlanScreen() {
         </View>
 
         <View style={{ height: 40 }} />
-      </ScrollView>
+      </SafeScrollView>
     </KeyboardAvoidingView>
   );
 }

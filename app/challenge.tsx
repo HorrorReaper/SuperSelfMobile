@@ -3,10 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useRouter } from 'expo-router';
 import { useChallengeStore } from '../stores/challengeStore';
 import { useUserStore } from '../stores/userStore';
@@ -88,7 +88,7 @@ export default function ChallengeScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <SafeScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
@@ -197,7 +197,7 @@ export default function ChallengeScreen() {
         </View>
 
         <View style={{ height: 40 }} />
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }

@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Dimensions,
   Animated,
   Platform,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useRouter } from 'expo-router';
 import SafeLinearGradient from './components/SafeLinearGradient';
 import { useRoutineStore } from '../stores/routineStore';
@@ -115,9 +115,9 @@ export default function MorningHub() {
       description: 'Start your day mindfully',
       gradient: ['#667eea', '#764ba2'],
       route: '/routine',
-      stats: `${Math.round(routineCompletion)}% Complete`,
+      stats: `${Math.min(Math.round(routineCompletion), 100)}% Complete`,
       streak: routineStreak,
-      completed: routineCompletion === 100,
+      completed: routineCompletion >= 100,
       animValue: card1Anim,
     },
     {
@@ -151,7 +151,7 @@ export default function MorningHub() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <SafeScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -234,7 +234,7 @@ export default function MorningHub() {
               <View style={styles.progressIconContainer}>
                 <Text style={styles.progressIcon}>✓</Text>
               </View>
-              <Text style={styles.progressValue}>{Math.round(routineCompletion)}%</Text>
+              <Text style={styles.progressValue}>{Math.min(Math.round(routineCompletion), 100)}%</Text>
               <Text style={styles.progressLabel}>Routine</Text>
             </View>
             <View style={styles.progressDivider} />
@@ -349,7 +349,7 @@ export default function MorningHub() {
             </View>
           </View>
         </Animated.View>
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }

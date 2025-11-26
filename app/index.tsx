@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useUserStore } from '../stores/userStore';
 import { useTaskStore } from '../stores/taskStore';
@@ -7,6 +9,7 @@ import { XPBar } from '../components/XPBar';
 import { TaskCard } from '../components/TaskCard';
 import { HabitCard } from '../components/HabitCard';
 import { useChallengeStore } from '../stores/challengeStore';
+import TodaysPlan from './components/TodaysPlan';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -23,9 +26,16 @@ const currentChallenge = getCurrentChallenge();
 
   const todayPlan = getTodayPlan();
 
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 20);
+
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <SafeScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 60 }}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.header}>SuperSelf</Text>
         <Text style={styles.subheader}>Day {profile.journeyDay} of 30</Text>
 
@@ -58,7 +68,7 @@ const currentChallenge = getCurrentChallenge();
     </View>
   </TouchableOpacity>
 )}
-
+        <TodaysPlan />
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Tasks</Text>
@@ -100,14 +110,14 @@ const currentChallenge = getCurrentChallenge();
 </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.reflectButton}
+          style={[styles.reflectButton, { marginBottom: bottomPad } ]}
           onPress={() => router.push('/reflect')}
         >
           <Text style={styles.reflectButtonText}>
             {todayPlan.reflectionCompleted ? '✅ Reflection Done' : '📝 Evening Reflection'}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import { XP_CONFIG, REDEMPTION_CONFIG } from '../constants/config';
 import { XPTransaction } from '../types';
 
-export const calculateTaskXP = (isCompleted: boolean): number => {
+export const calculateTaskXP = (isCompleted: boolean, ): number => {
   return isCompleted ? XP_CONFIG.TASK_BASE : 0;
 }; // Diese Funktion berechnet die XP für eine abgeschlossene Aufgabe basierend auf der Konfiguration
 

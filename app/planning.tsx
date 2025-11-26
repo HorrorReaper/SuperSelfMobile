@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   TextInput,
   Modal,
   Alert,
   Platform,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useDayPlanStore, TimeBlock, Task } from '../stores/dayPlanStore';
 import * as Haptics from 'expo-haptics';
 
@@ -190,7 +190,7 @@ export default function MorningPlanning() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <SafeScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Plan Tomorrow</Text>
@@ -368,7 +368,7 @@ export default function MorningPlanning() {
             </View>
           </View>
         )}
-      </ScrollView>
+      </SafeScrollView>
 
       {/* Add Time Block Modal */}
       <Modal

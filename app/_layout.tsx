@@ -5,6 +5,7 @@ import { appMonitor } from '../services/appMonitor';
 import { MicroChallenge } from '../types';
 import Constants from 'expo-constants';
 import { NativeModules, Platform } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { checkUsageStatsPermission } from '../lib/nativeAppMonitor';
 
 export default function RootLayout() {
@@ -47,12 +48,13 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#000' },
-      }}
-    >
+    <SafeAreaProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#000' },
+        }}
+      >
       <Stack.Screen name="index" />
       <Stack.Screen name="plan" />
       <Stack.Screen name="reflect" />
@@ -109,6 +111,7 @@ export default function RootLayout() {
           headerShadowVisible: false,
         }}
       />
-    </Stack>
+      </Stack>
+    </SafeAreaProvider>
   );
 }

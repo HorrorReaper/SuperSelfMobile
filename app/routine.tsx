@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
-  ScrollView,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SafeLinearGradient from './components/SafeLinearGradient';
 import { useRoutineStore } from '../stores/routineStore';
 
@@ -28,6 +29,7 @@ export default function RoutineScreen() {
 
   const template = getActiveTemplate();
   const currentStep = getCurrentStep();
+  const insets = useSafeAreaInsets();
   const completionRate = getTodayCompletionRate();
 
   const [timer, setTimer] = useState(0);
@@ -80,7 +82,7 @@ export default function RoutineScreen() {
   };
 
   const handleCompleteStep = () => {
-    if (currentStep) {
+    if (currentStep && !isLastStep) {
       completeStep(currentStep.id);
       handleStopTimer();
       setTimer(0);
@@ -96,6 +98,9 @@ export default function RoutineScreen() {
           nextStep();
         }, 500);
       }
+    }
+    if (isLastStep) {
+      finishRoutine();
     }
   };
 
@@ -138,7 +143,7 @@ export default function RoutineScreen() {
 
   return (
     <SafeLinearGradient colors={getGradientColors()} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <SafeScrollView contentContainerStyle={styles.scrollContent}>
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -235,10 +240,10 @@ export default function RoutineScreen() {
             Today's Completion: { Math.max(100,Math.round(completionRate))}%
           </Text>
         </View>
-      </ScrollView>
+      </SafeScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
+      <View style={[styles.bottomNav, { bottom: (insets?.bottom ?? 20) + 8, paddingBottom: (insets?.bottom ?? 20) + 8 }]}>
         <TouchableOpacity
           style={[
             styles.navButton,

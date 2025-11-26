@@ -3,10 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import SafeScrollView from '../components/SafeScrollView';
 import { router } from 'expo-router';
 import { useRoutineStore } from '../../stores/routineStore';
 import { useJournalStore } from '../../stores/journalStore';
@@ -58,7 +58,7 @@ export default function MorningHubScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <SafeScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.greeting}>Good Morning! 🌞</Text>
@@ -114,7 +114,7 @@ export default function MorningHubScreen() {
           </Text>
           <Text style={styles.quoteAuthor}>— Robin Sharma</Text>
         </View>
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }

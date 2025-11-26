@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   Animated,
   Alert,
 } from 'react-native';
+import SafeScrollView from './components/SafeScrollView';
 import { useJournalStore } from '../stores/journalStore';
 import { JournalAnswer } from '../types/index';
 import SafeSlider from './components/SafeSlider';
@@ -251,7 +251,7 @@ export default function JournalScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <SafeScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Morning Journal</Text>
@@ -338,7 +338,7 @@ export default function JournalScreen() {
             />
           ))}
         </View>
-      </ScrollView>
+      </SafeScrollView>
     </View>
   );
 }
