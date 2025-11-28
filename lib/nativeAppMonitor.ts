@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, Platform, Alert } from 'react-native';
 
 interface AppInfo {
   packageName: string;
@@ -26,19 +26,25 @@ const native = NativeModules.AppMonitor;
 const AppMonitor: AppMonitorModule = native
   ? native
   : {
-      async getForegroundApp() {
-        console.warn('[nativeAppMonitor] AppMonitor native module not linked: getForegroundApp unavailable');
-        return null;
-      },
-      async hasUsageStatsPermission() {
-        console.warn('[nativeAppMonitor] AppMonitor native module not linked: hasUsageStatsPermission -> false');
-        return false;
-      },
-      async openUsageStatsSettings() {
-        console.warn('[nativeAppMonitor] AppMonitor native module not linked: openUsageStatsSettings -> false');
-        return false;
-      },
-    };
+    async getForegroundApp() {
+      console.warn('[nativeAppMonitor] AppMonitor native module not linked: getForegroundApp unavailable');
+      return null;
+    },
+    async hasUsageStatsPermission() {
+      console.warn('[nativeAppMonitor] AppMonitor native module not linked: hasUsageStatsPermission -> false');
+      return false;
+    },
+    async openUsageStatsSettings() {
+      console.warn('[nativeAppMonitor] AppMonitor native module not linked: openUsageStatsSettings -> false');
+      if (Platform.OS === 'android') {
+        Alert.alert(
+          "Feature Unavailable",
+          "The AppMonitor native module is not linked. This feature requires a custom development build and will not work in Expo Go."
+        );
+      }
+      return false;
+    },
+  };
 
 export default AppMonitor;
 
