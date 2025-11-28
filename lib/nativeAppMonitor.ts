@@ -9,6 +9,7 @@ interface AppMonitorModule {
   getForegroundApp(): Promise<AppInfo | null>;
   hasUsageStatsPermission(): Promise<boolean>;
   openUsageStatsSettings(): Promise<boolean>;
+  startService(): void;
 }
 
 const LINKING_ERROR =
@@ -44,6 +45,9 @@ const AppMonitor: AppMonitorModule = native
       }
       return false;
     },
+    startService() {
+      console.warn('[nativeAppMonitor] AppMonitor native module not linked: startService unavailable');
+    }
   };
 
 export default AppMonitor;
@@ -86,5 +90,14 @@ export async function requestUsageStatsPermission(): Promise<boolean> {
   } catch (error) {
     console.error('Failed to open settings:', error);
     return false;
+  }
+}
+
+export function startForegroundService() {
+  if (Platform.OS !== 'android') return;
+  try {
+    AppMonitor.startService();
+  } catch (error) {
+    console.error('Failed to start foreground service:', error);
   }
 }

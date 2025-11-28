@@ -1,7 +1,7 @@
 import { AppState, AppStateStatus, Alert } from 'react-native';
 import { generateRandomChallenge } from '../lib/challengeGenerator';
 import { MicroChallenge } from '../types';
-import { getForegroundApp, checkUsageStatsPermission } from '../lib/nativeAppMonitor';
+import { getForegroundApp, checkUsageStatsPermission, startForegroundService } from '../lib/nativeAppMonitor';
 import { useAppBlockingStore } from '../stores/appBlockingStores';
 
 class AppMonitorService {
@@ -13,6 +13,9 @@ class AppMonitorService {
   async initialize() {
     this.hasPermission = await checkUsageStatsPermission();
     console.log('📱 Usage stats permission:', this.hasPermission);
+    if (this.hasPermission) {
+      startForegroundService();
+    }
     return this.hasPermission;
   }
 
