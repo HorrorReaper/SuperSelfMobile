@@ -1,7 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
 import { useAppBlockingStore } from '../stores/appBlockingStores';
 import { useEffect } from 'react';
-import { appMonitor } from '../services/appMonitor';
+import { appMonitor } from '../services/appMonitor2';
 import { MicroChallenge } from '../types';
 import Constants from 'expo-constants';
 import { NativeModules, Platform } from 'react-native';
@@ -55,62 +55,62 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: '#000' },
         }}
       >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="plan" />
-      <Stack.Screen name="reflect" />
-      <Stack.Screen name="redeem" />
-      <Stack.Screen name="challenge" />
-      <Stack.Screen name="blocking-settings" />
-      <Stack.Screen
-        name="blocking-overlay"
-        options={{
-          presentation: 'fullScreenModal',
-          animation: 'fade',
-        }}
-      />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="plan" />
+        <Stack.Screen name="reflect" />
+        <Stack.Screen name="redeem" />
+        <Stack.Screen name="challenge" />
+        <Stack.Screen name="blocking-settings" />
+        <Stack.Screen
+          name="blocking-overlay"
+          options={{
+            presentation: 'fullScreenModal',
+            animation: 'fade',
+          }}
+        />
 
-      {/* Morning Routine Screens */}
-      <Stack.Screen 
-        name="morning-hub" 
-        options={{
-          headerShown: true,
-          title: 'Morning Ritual',
-          headerStyle: { backgroundColor: '#000' },
-          headerTintColor: '#fff',
-          headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen 
-        name="routine" 
-        options={{
-          headerShown: true,
-          title: 'Morning Routine',
-          headerStyle: { backgroundColor: '#000' },
-          headerTintColor: '#fff',
-          headerShadowVisible: false,
-          presentation: 'card',
-        }}
-      />
-      <Stack.Screen 
-        name="planning" 
-        options={{
-          headerShown: true,
-          title: 'Plan Tomorrow',
-          headerStyle: { backgroundColor: '#000' },
-          headerTintColor: '#fff',
-          headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen 
-        name="journal" 
-        options={{
-          headerShown: true,
-          title: 'Morning Journal',
-          headerStyle: { backgroundColor: '#000' },
-          headerTintColor: '#fff',
-          headerShadowVisible: false,
-        }}
-      />
+        {/* Morning Routine Screens */}
+        <Stack.Screen
+          name="morning-hub"
+          options={{
+            headerShown: true,
+            title: 'Morning Ritual',
+            headerStyle: { backgroundColor: '#000' },
+            headerTintColor: '#fff',
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="routine"
+          options={{
+            headerShown: true,
+            title: 'Morning Routine',
+            headerStyle: { backgroundColor: '#000' },
+            headerTintColor: '#fff',
+            headerShadowVisible: false,
+            presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="planning"
+          options={{
+            headerShown: true,
+            title: 'Plan Tomorrow',
+            headerStyle: { backgroundColor: '#000' },
+            headerTintColor: '#fff',
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="journal"
+          options={{
+            headerShown: true,
+            title: 'Morning Journal',
+            headerStyle: { backgroundColor: '#000' },
+            headerTintColor: '#fff',
+            headerShadowVisible: false,
+          }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

@@ -20,45 +20,45 @@ export default function RedeemScreen() {
     redeemXP(amount, minutes);
   };
   const {
-  currentSession,
-  isBlocking,
-  startBlockingSession,
-  endBlockingSession,
-  getActiveBlockedApps,
-  initializeBlocking,
-} = useAppBlockingStore();
+    currentSession,
+    isBlocking,
+    startBlockingSession,
+    endBlockingSession,
+    getActiveBlockedApps,
+    initializeBlocking,
+  } = useAppBlockingStore();
 
-useEffect(() => {
-  initializeBlocking();
-}, []);
+  useEffect(() => {
+    initializeBlocking();
+  }, []);
 
   const todayRedeemed = getTodayRedeemed();
 
-const handleRedeem = async (minutes: number, xpCost: number) => {
-  if (profile.currentXP < xpCost) {
-    Alert.alert('Insufficient XP', 'You don\'t have enough XP to redeem this');
-    return;
-  }
+  const handleRedeem = async (minutes: number, xpCost: number) => {
+    if (profile.currentXP < xpCost) {
+      Alert.alert('Insufficient XP', 'You don\'t have enough XP to redeem this');
+      return;
+    }
 
-  const blockedApps = getActiveBlockedApps();
-  
-  Alert.alert(
-    'Start Redemption?',
-    `This will:\n• Deduct ${xpCost} XP\n• Give you ${minutes} minutes\n• Block ${blockedApps.length} apps`,
-    [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Start',
-        onPress: async () => {
-          deductXP(xpCost, minutes);
-          await startBlockingSession(minutes, xpCost);
-          setTimeRemaining(minutes * 60);
-          setIsActive(true);
+    const blockedApps = getActiveBlockedApps();
+
+    Alert.alert(
+      'Start Free Time?',
+      `This will:\n• Deduct ${xpCost} XP\n• Give you ${minutes} minutes of free time\n• Unblock ${blockedApps.length} apps temporarily`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Start',
+          onPress: async () => {
+            deductXP(xpCost, minutes);
+            await startBlockingSession(minutes, xpCost);
+            setTimeRemaining(minutes * 60);
+            setIsActive(true);
+          },
         },
-      },
-    ]
-  );
-}; // Diese Funktion behandelt die Einlöse-Logik und zeigt eine Bestätigungsaufforderung an.
+      ]
+    );
+  };
 
   if (isRedeeming) {
     return (
@@ -85,11 +85,11 @@ const handleRedeem = async (minutes: number, xpCost: number) => {
   }
 
   const handleEnd = async () => {
-  setIsActive(false);
-  setTimeRemaining(0);
-  await endBlockingSession();
-  router.back();
-};
+    setIsActive(false);
+    setTimeRemaining(0);
+    await endBlockingSession();
+    router.back();
+  };
 
   return (
     <View style={styles.container}>
@@ -102,19 +102,20 @@ const handleRedeem = async (minutes: number, xpCost: number) => {
       <Text style={styles.subtitle}>
         Redeemed today: {todayRedeemed}/{REDEMPTION_CONFIG.MAX_MINUTES_PER_DAY} min
       </Text>
+
       {isBlocking && currentSession && (
-  <View style={styles.blockingBanner}>
-    <Text style={styles.blockingTitle}>🚫 Apps Currently Blocked</Text>
-    <Text style={styles.blockingText}>
-      {getActiveBlockedApps().map(app => app.appName).join(', ')}
-    </Text>
-    {currentSession.violations > 0 && (
-      <Text style={styles.violationText}>
-        ⚠️ {currentSession.violations} violation{currentSession.violations > 1 ? 's' : ''} detected
-      </Text>
-    )}
-  </View>
-)}
+        <View style={styles.unblockingBanner}>
+          <Text style={styles.unblockingTitle}>✅ Apps Currently Unblocked</Text>
+          <Text style={styles.unblockingText}>
+            {getActiveBlockedApps().map(app => app.appName).join(', ')}
+          </Text>
+          {currentSession.violations > 0 && (
+            <Text style={styles.violationText}>
+              ⚠️ {currentSession.violations} violation{currentSession.violations > 1 ? 's' : ''} detected
+            </Text>
+          )}
+        </View>
+      )}
 
       <View style={styles.options}>
         <TouchableOpacity
@@ -132,12 +133,13 @@ const handleRedeem = async (minutes: number, xpCost: number) => {
           <Text style={styles.optionTime}>20 min</Text>
           <Text style={styles.optionCost}>60 XP</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-  style={styles.settingsLink}
-  onPress={() => router.push('/blocking-settings')}
->
-  <Text style={styles.settingsLinkText}>⚙️ Configure Blocked Apps</Text>
-</TouchableOpacity>
+          style={styles.settingsLink}
+          onPress={() => router.push('/blocking-settings')}
+        >
+          <Text style={styles.settingsLinkText}>⚙️ Configure Blocked Apps</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -200,39 +202,39 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 16,
   },
-  blockingBanner: {
-  backgroundColor: '#2a1a1a',
-  padding: 16,
-  borderRadius: 12,
-  marginBottom: 20,
-  borderWidth: 1,
-  borderColor: '#FF5252',
-},
-blockingTitle: {
-  color: '#FF5252',
-  fontSize: 14,
-  fontWeight: '600',
-  marginBottom: 8,
-},
-blockingText: {
-  color: '#aaa',
-  fontSize: 13,
-  lineHeight: 20,
-},
-violationText: {
-  color: '#FF9800',
-  fontSize: 13,
-  marginTop: 8,
-  fontWeight: '500',
-},
-settingsLink: {
-  padding: 16,
-  alignItems: 'center',
-  marginBottom: 20,
-},
-settingsLinkText: {
-  color: '#4CAF50',
-  fontSize: 15,
-  fontWeight: '500',
-},
+  unblockingBanner: {
+    backgroundColor: '#1a2a1a',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+  },
+  unblockingTitle: {
+    color: '#4CAF50',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  unblockingText: {
+    color: '#aaa',
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  violationText: {
+    color: '#FF9800',
+    fontSize: 13,
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  settingsLink: {
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  settingsLinkText: {
+    color: '#4CAF50',
+    fontSize: 15,
+    fontWeight: '500',
+  },
 });

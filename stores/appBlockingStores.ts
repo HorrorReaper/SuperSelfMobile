@@ -7,7 +7,7 @@ interface AppBlockingStore {
   currentSession: BlockingSession | null;
   isBlocking: boolean;
   attemptHistory: ChallengeAttempt[];
-  
+
   // Existing methods
   initializeBlocking: () => Promise<void>;
   addBlockedApp: (app: BlockedApp) => Promise<void>;
@@ -16,7 +16,7 @@ interface AppBlockingStore {
   startBlockingSession: (durationMinutes: number, xpCost: number) => Promise<void>;
   endBlockingSession: () => Promise<void>;
   getActiveBlockedApps: () => BlockedApp[];
-  
+
   // New methods for challenge system
   isAppCurrentlyBlocked: (packageName: string) => boolean;
   recordChallengeAttempt: (attempt: ChallengeAttempt) => Promise<void>;
@@ -24,7 +24,7 @@ interface AppBlockingStore {
   recordViolation: () => Promise<void>;
   recordSuccess: () => Promise<void>;
   getAppByPackage: (packageName: string) => BlockedApp | undefined;
-  
+
   save: () => Promise<void>;
 }
 
@@ -187,13 +187,13 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
         const session: BlockingSession = JSON.parse(sessionStored);
         const endTime = new Date(session.endTime);
         console.log('[AppStore] Found persisted session id:', session.id, 'endTime:', session.endTime);
-        
+
         if (endTime > new Date()) {
           // Clean up expired unlocks
           const validUnlocks = session.unlocks.filter(
             unlock => new Date(unlock.expiresAt) > new Date()
           );
-          
+
           set({
             currentSession: { ...session, unlocks: validUnlocks },
             isBlocking: true,
@@ -273,13 +273,13 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
   endBlockingSession: async () => {
     const { currentSession } = get();
     console.log('[AppStore] endBlockingSession called. currentSession:', currentSession ? currentSession.id : 'none');
-    
+
     if (currentSession) {
       const completedSession = {
         ...currentSession,
         completed: true,
       };
-      
+
       const history = await AsyncStorage.getItem('sessionHistory');
       const sessions = history ? JSON.parse(history) : [];
       sessions.push(completedSession);
@@ -292,28 +292,25 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
   },
 
   isAppCurrentlyBlocked: (packageName: string): boolean => {
-    const { currentSession, isBlocking } = get();
+    const { currentSession, isBlocking, blockedApps } = get();
     console.log('[AppStore] isAppCurrentlyBlocked check for', packageName, 'isBlocking:', isBlocking);
-    
-    if (!isBlocking || !currentSession) {
-      console.log('[AppStore] isAppCurrentlyBlocked -> false (no active session)');
+
+    // Check if this app is in the blocked apps list
+    const app = blockedApps.find(a => a.packageName === packageName);
+    if (!app || !app.isBlocked) {
+      console.log('[AppStore] isAppCurrentlyBlocked -> false (app not in blocked list or not marked as blocked)');
       return false;
     }
-    
-    // Check if app is in blocked list
-    if (!currentSession.blockedApps.includes(packageName)) {
-      console.log('[AppStore] isAppCurrentlyBlocked -> false (not in session.blockedApps)');
+
+    // If there's an active session, apps are UNBLOCKED (inverted logic)
+    if (isBlocking && currentSession) {
+      console.log('[AppStore] isAppCurrentlyBlocked -> false (active session = apps are unblocked)');
       return false;
     }
-    
-    // Check if app has valid unlock
-    const unlock = currentSession.unlocks.find(
-      (u) => u.packageName === packageName && new Date(u.expiresAt) > new Date()
-    );
-    
-    const blocked = !unlock; // Blocked if no valid unlock exists
-    console.log('[AppStore] isAppCurrentlyBlocked ->', blocked, 'unlock:', unlock);
-    return blocked;
+
+    // No active session = apps are BLOCKED
+    console.log('[AppStore] isAppCurrentlyBlocked -> true (no active session = apps are blocked)');
+    return true;
   },
 
   recordChallengeAttempt: async (attempt: ChallengeAttempt) => {
@@ -321,7 +318,7 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
     set((state) => ({
       attemptHistory: [...state.attemptHistory, attempt],
     }));
-    
+
     await AsyncStorage.setItem('attemptHistory', JSON.stringify(get().attemptHistory));
   },
 
@@ -340,12 +337,12 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
     set((state) => ({
       currentSession: state.currentSession
         ? {
-            ...state.currentSession,
-            unlocks: [
-              ...state.currentSession.unlocks.filter((u) => u.packageName !== packageName),
-              unlock,
-            ],
-          }
+          ...state.currentSession,
+          unlocks: [
+            ...state.currentSession.unlocks.filter((u) => u.packageName !== packageName),
+            unlock,
+          ],
+        }
         : null,
     }));
 
@@ -361,10 +358,10 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
     set((state) => ({
       currentSession: state.currentSession
         ? {
-            ...state.currentSession,
-            violations: state.currentSession.violations + 1,
-            failedChallenges: state.currentSession.failedChallenges + 1,
-          }
+          ...state.currentSession,
+          violations: state.currentSession.violations + 1,
+          failedChallenges: state.currentSession.failedChallenges + 1,
+        }
         : null,
     }));
 
@@ -380,9 +377,9 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
     set((state) => ({
       currentSession: state.currentSession
         ? {
-            ...state.currentSession,
-            successfulChallenges: state.currentSession.successfulChallenges + 1,
-          }
+          ...state.currentSession,
+          successfulChallenges: state.currentSession.successfulChallenges + 1,
+        }
         : null,
     }));
 
@@ -395,7 +392,7 @@ export const useAppBlockingStore = create<AppBlockingStore>((set, get) => ({
 
   getActiveBlockedApps: () => {
     const active = get().blockedApps.filter((app) => app.isBlocked);
-    console.log('[AppStore] getActiveBlockedApps -> count:', active.length, active.map(a=>a.packageName));
+    console.log('[AppStore] getActiveBlockedApps -> count:', active.length, active.map(a => a.packageName));
     return active;
   },
 

@@ -14,37 +14,14 @@ import { appMonitor } from '../services/appMonitor2';
 import { checkUsageStatsPermission } from '../lib/nativeAppMonitor';
 import PermissionRequest from '../components/PermissionRequest';
 
-export default function BlockingSettingsScreen() {
+function BlockingSettingsContent() {
   const router = useRouter();
   const { blockedApps, initializeBlocking, toggleAppBlock } = useAppBlockingStore();
-  const [hasPermission, setHasPermission] = useState(false);
-  const [permissionChecked, setPermissionChecked] = useState(false);
-
-  useEffect(() => {
-    checkPermission();
-  }, []);
-
-  const checkPermission = async () => {
-    const granted = await checkUsageStatsPermission();
-    setHasPermission(granted);
-    setPermissionChecked(true);
-
-    if (granted) {
-      await appMonitor.initialize();
-    }
-  };
-
-  if (!permissionChecked) {
-    return <View style={{ flex: 1, backgroundColor: '#000' }} />;
-  }
-
-  if (!hasPermission) {
-    return <PermissionRequest onPermissionGranted={() => setHasPermission(true)} />;
-  }
 
   useEffect(() => {
     initializeBlocking();
-  }, []); // Initialisiere die Blockierungseinstellungen beim Laden des Bildschirms
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Initialize blocking settings when component mounts
 
   // Render-time debug log to quickly inspect store state when the screen renders
   console.log('[BlockingSettings] render blockedApps ->', blockedApps.map(a => ({ packageName: a.packageName, isBlocked: a.isBlocked })));
@@ -61,7 +38,7 @@ export default function BlockingSettingsScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>App Blocking</Text>
         <Text style={styles.subtitle}>
-          Select which apps to block during redemption sessions
+          Select which apps to block during focus sessions
         </Text>
       </View>
 
@@ -69,10 +46,10 @@ export default function BlockingSettingsScreen() {
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>🚫 How it works</Text>
           <Text style={styles.infoText}>
-            • Selected apps will be blocked when you redeem screen time{'\n'}
-            • A warning appears if you try to open blocked apps{'\n'}
-            • Violations are tracked but won't end your session{'\n'}
-            • Stay disciplined and honor your commitment
+            • Selected apps are BLOCKED by default{'\n'}
+            • When you redeem screen time (10min/20min), apps become AVAILABLE{'\n'}
+            • After the time expires, apps are BLOCKED again{'\n'}
+            • Use this to earn breaks from your focus sessions
           </Text>
         </View>
 
@@ -109,25 +86,54 @@ export default function BlockingSettingsScreen() {
 
         <View style={{ height: 40 }} />
 
-<View style={styles.testSection}>
-  <Text style={styles.sectionTitle}>Test Blocking System</Text>
-  
-  {getActiveBlockedApps().map((app) => (
-    <TouchableOpacity
-      key={app.packageName}
-      style={styles.testButton}
-      onPress={() => {
-        Alert.alert('Simulate Block', `Simulating blocked open: ${app.appName}`);
-        appMonitor.simulateBlockedAppOpen(app.packageName);
-      }}
-    >
-      <Text style={styles.testButtonText}>Test Block: {app.appName}</Text>
-    </TouchableOpacity>
-  ))}
-</View>
+        <View style={styles.testSection}>
+          <Text style={styles.sectionTitle}>Test Blocking System</Text>
+
+          {getActiveBlockedApps().map((app) => (
+            <TouchableOpacity
+              key={app.packageName}
+              style={styles.testButton}
+              onPress={() => {
+                Alert.alert('Simulate Block', `Simulating blocked open: ${app.appName}`);
+                appMonitor.simulateBlockedAppOpen(app.packageName);
+              }}
+            >
+              <Text style={styles.testButtonText}>Test Block: {app.appName}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </SafeScrollView>
     </View>
   );
+}
+
+export default function BlockingSettingsScreen() {
+  const [hasPermission, setHasPermission] = useState(false);
+  const [permissionChecked, setPermissionChecked] = useState(false);
+
+  useEffect(() => {
+    checkPermission();
+  }, []);
+
+  const checkPermission = async () => {
+    const granted = await checkUsageStatsPermission();
+    setHasPermission(granted);
+    setPermissionChecked(true);
+
+    if (granted) {
+      await appMonitor.initialize();
+    }
+  };
+
+  if (!permissionChecked) {
+    return <View style={{ flex: 1, backgroundColor: '#000' }} />;
+  }
+
+  if (!hasPermission) {
+    return <PermissionRequest onPermissionGranted={() => setHasPermission(true)} />;
+  }
+
+  return <BlockingSettingsContent />;
 }
 
 const styles = StyleSheet.create({
@@ -244,21 +250,21 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   testSection: {
-  marginTop: 24,
-  paddingTop: 24,
-  borderTopWidth: 1,
-  borderTopColor: '#2a2a2a',
-},
-testButton: {
-  backgroundColor: '#2196F3',
-  padding: 14,
-  borderRadius: 10,
-  alignItems: 'center',
-  marginBottom: 10,
-},
-testButtonText: {
-  color: '#fff',
-  fontSize: 15,
-  fontWeight: '600',
-},
+    marginTop: 24,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#2a2a2a',
+  },
+  testButton: {
+    backgroundColor: '#2196F3',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  testButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
 });

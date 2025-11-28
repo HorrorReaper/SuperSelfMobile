@@ -1,4 +1,4 @@
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Alert } from 'react-native';
 import { generateRandomChallenge } from '../lib/challengeGenerator';
 import { MicroChallenge } from '../types';
 import { getForegroundApp, checkUsageStatsPermission } from '../lib/nativeAppMonitor';
@@ -37,16 +37,17 @@ class AppMonitorService {
 
   private async checkForegroundApp() {
     const { isBlocking, isAppCurrentlyBlocked, getAppByPackage } = useAppBlockingStore.getState();
-    
-    if (!isBlocking) return;
+
+    // With inverted logic: only check when NOT blocking (apps are blocked by default)
+    if (isBlocking) return; // During free time, apps are unblocked, no need to monitor
 
     try {
       const foregroundApp = await getForegroundApp();
-      
+
       if (!foregroundApp) return;
 
       // Ignore our own app
-      if (foregroundApp.packageName === 'com.superself.app') {
+      if (foregroundApp.packageName === 'com.horrorreaper.SuperSelfMobile') {
         this.currentAppPackage = null;
         return;
       }
@@ -59,13 +60,13 @@ class AppMonitorService {
         if (isAppCurrentlyBlocked(foregroundApp.packageName)) {
           const app = getAppByPackage(foregroundApp.packageName);
           const challenge = generateRandomChallenge();
-          
+
           console.log('🚫 Blocked app detected:', foregroundApp.appName);
-          
+
           if (this.onBlockedAppDetected && app) {
             this.onBlockedAppDetected(
-              foregroundApp.packageName, 
-              app.appName, 
+              foregroundApp.packageName,
+              app.appName,
               challenge
             );
           }
@@ -87,15 +88,51 @@ class AppMonitorService {
 
   // Manual trigger for testing
   simulateBlockedAppOpen(packageName: string) {
-    const { getAppByPackage, isAppCurrentlyBlocked } = useAppBlockingStore.getState();
-    
+    const { getAppByPackage, isAppCurrentlyBlocked, isBlocking } = useAppBlockingStore.getState();
+
+    console.log('[AppMonitor] simulateBlockedAppOpen called for:', packageName);
+    console.log('[AppMonitor] isBlocking:', isBlocking);
+    console.log('[AppMonitor] isAppCurrentlyBlocked:', isAppCurrentlyBlocked(packageName));
+
+    const app = getAppByPackage(packageName);
+    console.log('[AppMonitor] app found:', app);
+
+    if (!app) {
+      console.warn('[AppMonitor] App not found in store');
+      return;
+    }
+
+    if (isBlocking) {
+      console.warn('[AppMonitor] Active session running - apps are UNBLOCKED');
+      Alert.alert(
+        'Apps Currently Unblocked',
+        'You have an active free time session. Apps are unblocked right now. Wait for the session to end to test blocking.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     if (isAppCurrentlyBlocked(packageName)) {
-      const app = getAppByPackage(packageName);
       const challenge = generateRandomChallenge();
-      
-      if (this.onBlockedAppDetected && app) {
+      console.log('[AppMonitor] Triggering blocked app callback with challenge:', challenge.id);
+
+      if (this.onBlockedAppDetected) {
         this.onBlockedAppDetected(packageName, app.appName, challenge);
+      } else {
+        console.warn('[AppMonitor] No onBlockedAppDetected callback registered');
+        Alert.alert(
+          'Blocking Active',
+          `${app.appName} is currently blocked. In a real scenario, you would see a challenge when trying to open this app.`,
+          [{ text: 'OK' }]
+        );
       }
+    } else {
+      console.warn('[AppMonitor] App is not currently blocked');
+      Alert.alert(
+        'App Not Blocked',
+        `${app.appName} is not in your blocked apps list. Enable it in the settings to test blocking.`,
+        [{ text: 'OK' }]
+      );
     }
   }
 }
