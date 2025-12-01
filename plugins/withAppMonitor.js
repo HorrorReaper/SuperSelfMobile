@@ -1,4 +1,4 @@
-const { withAndroidManifest, withDangerousMod, withPlugins } = require('@expo/config-plugins');
+const { withAndroidManifest, withDangerousMod, withPlugins, withMainApplication } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
 
@@ -69,6 +69,13 @@ const withAppMonitorFiles = (config) => {
                 if (fs.existsSync(moduleSrc)) {
                     fs.copyFileSync(moduleSrc, moduleDest);
                 }
+
+                // Copy AppMonitorPackage.kt
+                const packageSrc = path.join(projectRoot, 'plugins/AppMonitorPackage.kt');
+                const packageDest = path.join(androidSrcDir, 'AppMonitorPackage.kt');
+                if (fs.existsSync(packageSrc)) {
+                    fs.copyFileSync(packageSrc, packageDest);
+                }
             }
 
             return config;
@@ -76,10 +83,40 @@ const withAppMonitorFiles = (config) => {
     ]);
 };
 
+const withAppMonitorPackage = (config) => {
+    return withMainApplication(config, (config) => {
+        let mainApplication = config.modResults.contents;
+
+        // Check if package is already added
+        if (!mainApplication.includes('packages.add(AppMonitorPackage())')) {
+            // Find the place to add the package
+            // Usually inside getPackages()
+            const search = 'val packages = PackageList(this).packages';
+            const replace = `${search}\n        packages.add(AppMonitorPackage())`;
+
+            if (mainApplication.includes(search)) {
+                mainApplication = mainApplication.replace(search, replace);
+            } else {
+                // Fallback for different MainApplication structures
+                // Try to find return packages
+                const searchReturn = 'return packages';
+                const replaceReturn = 'packages.add(AppMonitorPackage())\n        return packages';
+                if (mainApplication.includes(searchReturn)) {
+                    mainApplication = mainApplication.replace(searchReturn, replaceReturn);
+                }
+            }
+        }
+
+        config.modResults.contents = mainApplication;
+        return config;
+    });
+};
+
 const withAppMonitor = (config) => {
     return withPlugins(config, [
         withAppMonitorPermissions,
         withAppMonitorFiles,
+        withAppMonitorPackage,
     ]);
 };
 

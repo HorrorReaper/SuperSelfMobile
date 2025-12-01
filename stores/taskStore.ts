@@ -9,10 +9,11 @@ import { JOURNEY_CONFIG } from '../constants/config';
 interface TaskStore {
   habits: Habit[];
   dailyPlans: Record<string, DailyPlan>;
-  
+
   initializeStore: () => Promise<void>;
   createDefaultHabits: () => void;
   getTodayPlan: () => DailyPlan;
+  ensureTodayPlan: () => void;
   addTask: (title: string) => Promise<void>;
   toggleTask: (taskId: string, onXPEarned: (xp: number) => void) => Promise<void>;
   toggleHabit: (habitId: string, onXPEarned: (xp: number) => void) => Promise<void>;
@@ -26,7 +27,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({ // Initialer Zust
 
   initializeStore: async () => {
     try {
-      const storedHabits = await AsyncStorage.getItem('habits') ; //quasi wie SessionStorage im Web, nur für React Native Apps
+      const storedHabits = await AsyncStorage.getItem('habits'); //quasi wie SessionStorage im Web, nur für React Native Apps
       const storedPlans = await AsyncStorage.getItem('dailyPlans');
 
       if (storedHabits) {
@@ -38,6 +39,8 @@ export const useTaskStore = create<TaskStore>((set, get) => ({ // Initialer Zust
       if (storedPlans) {
         set({ dailyPlans: JSON.parse(storedPlans) });
       }
+
+      get().ensureTodayPlan();
     } catch (error) {
       console.error('Failed to load task data:', error);
     }
@@ -64,6 +67,20 @@ export const useTaskStore = create<TaskStore>((set, get) => ({ // Initialer Zust
 
     if (plan) return plan;
 
+    return {
+      date: today,
+      tasks: [],
+      habits: get().habits.map((h) => h.id),
+      xpEarned: 0,
+      xpSpendt: 0,
+      reflectionCompleted: false,
+    }; // Gibt den Tagesplan zurück oder ein Standard-Objekt (ohne State-Update)
+  },
+
+  ensureTodayPlan: () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    if (get().dailyPlans[today]) return;
+
     const newPlan: DailyPlan = {
       date: today,
       tasks: [],
@@ -71,14 +88,12 @@ export const useTaskStore = create<TaskStore>((set, get) => ({ // Initialer Zust
       xpEarned: 0,
       xpSpendt: 0,
       reflectionCompleted: false,
-    }; // Neuer Tagesplan, wenn noch keiner existiert
+    };
 
     set((state) => ({
       dailyPlans: { ...state.dailyPlans, [today]: newPlan },
     }));
-
-    return newPlan;
-  }, // Holt den Tagesplan für heute oder erstellt einen neuen, wenn keiner existiert
+  }, // Erstellt den Tagesplan im State, falls er noch nicht existiert
 
   addTask: async (title: string) => {
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -146,7 +161,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({ // Initialer Zust
       const updatedHabits = state.habits.map((habit) => {
         if (habit.id === habitId) {
           const alreadyCompleted = isCompletedToday(habit.history);
-          
+
           if (alreadyCompleted) {
             // Uncomplete
             return {
